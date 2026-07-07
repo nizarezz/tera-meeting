@@ -1640,7 +1640,6 @@ export async function skipCurrentAgendaItem(meetingId: string, userId: string) {
         data: {
           activeAgendaItem: { connect: { id: nextItem.id } },
           activeItemStartedAt: now,
-          activeItemExtensionSeconds: 0,
           version: { increment: 1 },
         },
       });
