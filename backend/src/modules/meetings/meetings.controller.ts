@@ -172,7 +172,7 @@ export const extendOvertime = asyncHandler(async (req: Request, res: Response) =
 });
 
 export const takeover = asyncHandler(async (req: Request, res: Response) => {
-  takeoverBodySchema.parse(req.body);
+  takeoverBodySchema.parse(req.body ?? {});
   const meeting = await meetingsService.takeoverMeeting(req.params.id as string, req.user!.sub);
   res.json(meeting);
 });
