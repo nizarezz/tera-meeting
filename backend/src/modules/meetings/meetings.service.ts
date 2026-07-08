@@ -315,7 +315,8 @@ export async function browseMeetings(userId: string, params: BrowseParams): Prom
     const isAttendee = m.attendees?.some((a: any) => a.userId === userId);
     const canOpenLiveRoom =
       (m.status === "IN_PROGRESS" && (isOrganizer || isSecretary || isAttendee)) ||
-      (m.status === "SCHEDULED" && (isOrganizer || isSecretary));
+      (m.status === "SCHEDULED" && (isOrganizer || isSecretary) &&
+        (!m.scheduledAt || new Date(m.scheduledAt).getTime() - Date.now() <= 3600_000));
     const canViewMeetingSummary = m.status === "ENDED_PENDING_SUMMARY" || m.status === "COMPLETED_LOCKED";
 
     const room = m.room ?? null;
@@ -379,7 +380,8 @@ export async function getMeetingDetail(id: string, userId: string) {
       (meeting.status === "IN_PROGRESS" && (isOrganizer || isSecretary ||
         meeting.attendees.some((a) => a.userId === userId && !a.removedAt) ||
         meeting.agendaItems.some((item) => item.speakers.some((s) => s.userId === userId)))) ||
-      (meeting.status === "SCHEDULED" && (isOrganizer || isSecretary)),
+      (meeting.status === "SCHEDULED" && (isOrganizer || isSecretary) &&
+        (!meeting.scheduledAt || new Date(meeting.scheduledAt).getTime() - Date.now() <= 3600_000)),
     canManageAttendees:
       meeting.status === "SCHEDULED" &&
       meeting.kind === "QUICK_TEAM" &&
@@ -776,6 +778,9 @@ export async function startMeeting(id: string, userId: string) {
   }
   if (meeting.organizerId !== userId) {
     throw new ForbiddenError("Only the meeting organizer can start the meeting");
+  }
+  if (meeting.scheduledAt && meeting.scheduledAt.getTime() - Date.now() > 3600_000) {
+    throw new ValidationError("Cannot start a meeting more than 1 hour before its scheduled time");
   }
 
   const now = new Date();

@@ -80,7 +80,8 @@ export async function getDayCalendar(userId: string, dateStr: string): Promise<C
     const isAttendee = m.attendees?.some((a: any) => a.userId === userId);
     const canOpenLiveRoom =
       (m.status === "IN_PROGRESS" && (isOrganizer || isSecretary || isAttendee)) ||
-      (m.status === "SCHEDULED" && (isOrganizer || isSecretary));
+      (m.status === "SCHEDULED" && (isOrganizer || isSecretary) &&
+        (!m.scheduledAt || m.scheduledAt.getTime() - Date.now() <= 3600_000));
     const canViewMeetingSummary = m.status === "ENDED_PENDING_SUMMARY" || m.status === "COMPLETED_LOCKED";
 
     const room = m.room ?? null;

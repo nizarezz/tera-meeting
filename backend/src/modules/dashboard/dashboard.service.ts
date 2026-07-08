@@ -88,7 +88,8 @@ export async function getDashboard(userId: string) {
     const isAttendee = m.attendees?.some((a: any) => a.userId === userId);
     const hasSpeaker = false;
     const canEnterLive = (m.status === "IN_PROGRESS" && (isOrganizer || isSecretary || isAttendee || hasSpeaker)) ||
-      (m.status === "SCHEDULED" && (isOrganizer || isSecretary));
+      (m.status === "SCHEDULED" && (isOrganizer || isSecretary) &&
+        (!m.scheduledAt || m.scheduledAt.getTime() - Date.now() <= 3600_000));
     const canViewSummary = m.status === "ENDED_PENDING_SUMMARY" || m.status === "COMPLETED_LOCKED";
     const canSubmitSummary = m.status === "ENDED_PENDING_SUMMARY" && (isOrganizer || isSecretary);
 
