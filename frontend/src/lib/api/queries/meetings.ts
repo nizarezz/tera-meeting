@@ -59,6 +59,7 @@ export function useLiveState(id: string) {
     queryFn: () => fetchLiveState(id),
     enabled: !!id,
     refetchInterval: 10_000,
+    refetchIntervalInBackground: true,
   });
 }
 

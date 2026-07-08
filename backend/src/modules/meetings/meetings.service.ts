@@ -429,6 +429,8 @@ export async function createMeeting(
     }
   }
 
+  let meeting: any = null;
+  let actorId: string | null = null;
   const scheduledAt = data.scheduledAt ? new Date(data.scheduledAt) : null;
   const locationType = data.locationType;
   if (!locationType) throw new ValidationError("locationType is required");
@@ -448,6 +450,7 @@ export async function createMeeting(
       select: { id: true, organizationId: true, functionalTeamId: true, operationalRole: true, isExecutive: true, isActive: true },
     });
     if (!actor || !actor.isActive) throw new ForbiddenError("Active user profile required to create meetings");
+    actorId = actor.id;
     if (actor.operationalRole !== "SECRETARY" && actor.operationalRole !== "TEAM_ADMIN") {
       throw new ForbiddenError("Only secretaries and team admins can create meetings");
     }
@@ -524,7 +527,7 @@ export async function createMeeting(
     }
 
     const attendeeIds = [...new Set([...suppliedAttendeeIds, actor.id])];
-    const meeting = await tx.meeting.create({
+    const result = await tx.meeting.create({
       data: {
         title: data.title,
         kind,
@@ -553,6 +556,7 @@ export async function createMeeting(
       },
       include: { attendees: { include: { user: true } }, agendaItems: { orderBy: { sortOrder: "asc" } } },
     });
+    meeting = result;
 
     if (scheduledAt && data.roomId && (locationType === "PHYSICAL" || locationType === "HYBRID")) {
       await tx.roomBooking.create({
@@ -575,8 +579,26 @@ export async function createMeeting(
       }
     }
 
-    return meeting;
+    return result;
   });
+
+  // Create invitation notifications for all non-creator attendees
+  if (scheduledAt && meeting) {
+    for (const att of meeting.attendees) {
+      if (att.userId === actorId) continue;
+      await prisma.notification.create({
+        data: {
+          userId: att.userId,
+          type: "MEETING_INVITATION",
+          title: `Meeting invitation: ${meeting.title}`,
+          body: `You've been invited to "${meeting.title}" on ${scheduledAt!.toLocaleDateString()}`,
+          data: { meetingId: meeting.id },
+        },
+      }).catch(() => {});
+    }
+  }
+
+  return meeting;
 }
 
 export async function createQuickMeeting(
