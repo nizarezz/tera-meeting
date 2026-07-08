@@ -7,6 +7,7 @@ import { createSocketServer } from "./config/socket";
 import { registerSockets } from "./sockets";
 import { startAutoLockWorker, stopAutoLockWorker } from "./workers/auto-lock";
 import { startLiveReconciler, stopLiveReconciler } from "./workers/live-meeting-reconciler";
+import { startMeetingReminderWorker, stopMeetingReminderWorker } from "./workers/meeting-reminder";
 
 async function main() {
   // 1. Validate environment (already done by env.ts import)
@@ -34,11 +35,13 @@ async function main() {
   // 4. Start background workers (only after DB confirmed)
   startAutoLockWorker();
   startLiveReconciler();
+  startMeetingReminderWorker();
 
   function gracefulShutdown() {
     logger.info("Shutting down gracefully...");
     stopAutoLockWorker();
     stopLiveReconciler();
+    stopMeetingReminderWorker();
     httpServer.close(() => process.exit(0));
     setTimeout(() => process.exit(1), 5000);
   }

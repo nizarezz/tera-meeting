@@ -1588,6 +1588,39 @@ export async function reconcileLiveMeeting(meetingId: string, now: Date): Promis
     if (autoEnded) changed = true;
   }
 
+  // ── Phase 3: Timeout warnings ──
+  if (timer.activeAgendaItemId && timer.activeItemStartedAt) {
+    const activeItem = items.find((i) => i.id === timer.activeAgendaItemId);
+    if (activeItem && activeItem.status === "IN_PROGRESS") {
+      const budget = (activeItem.durationSeconds ?? 0) + (activeItem.extensionSeconds ?? 0);
+      const itemEnd = new Date(timer.activeItemStartedAt.getTime() + budget * 1000);
+      const timeLeft = itemEnd.getTime() - now.getTime();
+      if (timeLeft > 0 && timeLeft <= 30_000) {
+        const existing = await prisma.notification.findFirst({
+          where: { userId: meeting.organizerId, type: "MEETING_REMINDER", createdAt: { gte: new Date(now.getTime() - 60_000) } },
+        });
+        if (!existing) {
+          await prisma.notification.create({
+            data: { userId: meeting.organizerId, type: "MEETING_REMINDER", title: "Agenda item ending soon", body: `"${activeItem.title}" ends in ${Math.ceil(timeLeft / 1000)}s`, data: { meetingId } },
+          });
+        }
+      }
+    }
+  }
+  if (timer.overtimeDeadlineAt) {
+    const timeLeftOvertime = timer.overtimeDeadlineAt.getTime() - now.getTime();
+    if (timeLeftOvertime > 0 && timeLeftOvertime <= 30_000) {
+      const existing = await prisma.notification.findFirst({
+        where: { userId: meeting.organizerId, type: "MEETING_REMINDER", createdAt: { gte: new Date(now.getTime() - 60_000) } },
+      });
+      if (!existing) {
+        await prisma.notification.create({
+          data: { userId: meeting.organizerId, type: "MEETING_REMINDER", title: "Meeting overtime ending soon", body: `Overtime ends in ${Math.ceil(timeLeftOvertime / 1000)}s`, data: { meetingId } },
+        });
+      }
+    }
+  }
+
   if (changed) {
     const updatedMeeting = await prisma.meeting.findUnique({
       where: { id: meetingId },
