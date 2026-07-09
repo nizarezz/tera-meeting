@@ -55,7 +55,7 @@ export default function ExecutiveRequestsPage() {
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4">
+      <div className="flex items-center gap-2 bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-2 overflow-x-auto">
         {["ALL", "OPEN", "PLANNING", "SCHEDULED", "COMPLETED", "CANCELLED"].map((s) => {
           const count = s === "ALL" ? requests?.length : requests?.filter((r) => r.status === s).length;
           return (
@@ -63,7 +63,7 @@ export default function ExecutiveRequestsPage() {
               key={s}
               onClick={() => setFilter(s)}
               className={cn(
-                "rounded-xl text-sm font-semibold px-4 py-2 transition-all",
+                "rounded-xl text-sm font-semibold whitespace-nowrap shrink-0 px-3 py-1.5 md:px-4 md:py-2 transition-all",
                 filter === s
                   ? "bg-primary text-primary-foreground"
                   : "border border-outline-variant bg-background text-on-surface hover:bg-surface-container-high"

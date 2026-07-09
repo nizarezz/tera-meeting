@@ -120,12 +120,12 @@ export default function ParkingLotPage() {
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4">
+      <div className="flex items-center gap-2 bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-2 overflow-x-auto">
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`rounded-xl text-sm font-semibold px-4 py-2 transition-all ${
+            className={`rounded-xl text-sm font-semibold whitespace-nowrap shrink-0 px-3 py-1.5 md:px-4 md:py-2 transition-all ${
               activeTab === tab.key
                 ? "bg-primary text-primary-foreground"
                 : "border border-outline-variant bg-background text-on-surface hover:bg-surface-container-high"
