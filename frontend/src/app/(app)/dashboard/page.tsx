@@ -35,8 +35,7 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6">
-        <div className="space-y-2">
+      <div className="p-4 md:p-6 space-y-6 overflow-x-hidden">        <div className="space-y-2">
           <div className="h-8 w-64 bg-surface-container-high rounded-lg" />
           <div className="h-4 w-96 bg-surface-container-high rounded-lg" />
         </div>
@@ -86,7 +85,7 @@ export default function DashboardPage() {
   const showExecCta = capabilities.canCreateExecutiveRequest;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6 overflow-x-hidden">
       <header className="space-y-1">
         <h1 className="font-headline text-3xl font-bold text-on-surface">
           {greeting}, {user?.name?.split(" ")[0] ?? "there"}.

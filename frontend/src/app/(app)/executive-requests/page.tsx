@@ -42,7 +42,7 @@ export default function ExecutiveRequestsPage() {
   }) ?? [];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 overflow-x-hidden">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="font-headline text-3xl font-bold text-on-surface">Executive Requests</h1>

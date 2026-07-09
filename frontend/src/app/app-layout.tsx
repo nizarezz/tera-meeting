@@ -119,7 +119,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <main className="flex-1 min-h-screen ml-0 md:ml-60">
+      <main className="flex-1 min-h-screen ml-0 md:ml-60 overflow-x-hidden">
         <button
           onClick={() => setSidebarOpen(true)}
           className="fixed top-4 left-4 z-20 md:hidden p-2 rounded-lg bg-surface-container-low border border-outline-variant/20 text-on-surface shadow-md"

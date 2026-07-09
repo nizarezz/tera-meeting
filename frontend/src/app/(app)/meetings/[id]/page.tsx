@@ -372,7 +372,7 @@ export default function MeetingDetailPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6 overflow-x-hidden">
       <Link
         href="/meetings"
         className="flex items-center gap-1 text-sm text-secondary hover:text-primary transition-colors w-fit"

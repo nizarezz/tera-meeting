@@ -153,7 +153,7 @@ export default function MeetingsPage() {
   const hasActiveFilters = statuses || kinds || search || ownerTeamId;
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-4 md:p-6 space-y-5 overflow-x-hidden">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="font-headline text-3xl font-bold text-on-surface">Meetings</h1>
