@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useCurrentUser } from "@/lib/api/queries/auth";
-import { useUnreadCount } from "@/lib/api/queries/notifications";
+import { useUnreadCount, useNotifications } from "@/lib/api/queries/notifications";
 import { useAuth } from "@/components/providers/auth-provider";
 import { DashboardIcon, GroupsIcon, ParkingIcon, PriorityHighIcon, CalendarIcon, NotificationsIcon, AdminIcon, PlusCircleIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { playBeep } from "@/lib/sounds";
+import { playBeep, playAlarm } from "@/lib/sounds";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", Icon: DashboardIcon },
@@ -44,7 +44,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const { data: user } = useCurrentUser();
   const { signOut } = useAuth();
   const { data: unreadData } = useUnreadCount();
+  const { data: notifications } = useNotifications();
   const prevRef = useRef(0);
+  const prevIdRef = useRef<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -57,9 +59,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const current = unreadData?.count ?? 0;
-    if (current > prevRef.current) playBeep();
+    if (current > prevRef.current) {
+      const latest = notifications?.[0];
+      if (latest && latest.id !== prevIdRef.current) {
+        if (latest.type === "MEETING_REMINDER" || latest.type === "MEETING_CANCELLED") {
+          playAlarm();
+        } else {
+          playBeep();
+        }
+        prevIdRef.current = latest.id;
+      }
+    }
     prevRef.current = current;
-  }, [unreadData?.count]);
+  }, [unreadData?.count, notifications]);
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -101,9 +113,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <button
-              onClick={() => playBeep()}
+              onClick={() => { playBeep(); setTimeout(playAlarm, 600); }}
               className="p-2 rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container-high/60 transition-all"
-              title="Test notification sound"
+              title="Test notification sound (beep then alarm)"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
